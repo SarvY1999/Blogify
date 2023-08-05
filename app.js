@@ -20,5 +20,4 @@ const start = async () => {
         console.log(error);
     }
 };
- // comments by me dss
 start();
