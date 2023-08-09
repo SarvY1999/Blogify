@@ -1,7 +1,7 @@
 const User = require('../Model/user');
 const { StatusCodes } = require('http-status-codes');
 const BadRequestError = require('../error/BadReqError');
-const {genToken} = require('../utils/createToken');
+const {createCookieAndAttachtoUser} = require('../utils/createToken');
 
 const register = async (req, res) => {
     const { name, email, password } = req.body;
@@ -12,14 +12,16 @@ const register = async (req, res) => {
         throw new BadRequestError("User Already Exists", StatusCodes.BAD_REQUEST)
     }
     const user = await User.create({ name, email, password });
-    const userObj = {name: user.name, email: user.email, password: user.password, role: user.role}
-    const token = genToken(userObj);
-
-    res.status(StatusCodes.CREATED).json({ user : userObj, token});
+    const userObj = {name: user.name, email: user.email, role: user.role}
+    createCookieAndAttachtoUser(res, userObj);
+    res.status(StatusCodes.CREATED).json({ user : userObj});
 };
 
 const login = async (req, res) => {
     const {email, password } = req.body;
+    if(!email || !password) {
+        throw new BadRequestError("Please provide Email and Password", StatusCodes.NOT_ACCEPTABLE)
+    }
 
     const user = await User.findOne({ email });
 
@@ -33,11 +35,18 @@ const login = async (req, res) => {
         throw new BadRequestError("Credentials invalid", StatusCodes.UNAUTHORIZED);
     }
 
+    const userObj = {name: user.name, email: user.email, role: user.role}
+    createCookieAndAttachtoUser(res, userObj);
+
     res.status(StatusCodes.OK).json({msg : "User logged in Successfull"});
 };
 
 const logout = async (req, res) => {
-    res.send('logout user cont')
+    res.cookie('token', '', {
+        httpOnly: true,
+        expires: new Date(Date.now()),
+    })
+    res.status(StatusCodes.OK).json({msg: "User logged out successfully"});
 };
 
 module.exports = {
