@@ -3,14 +3,14 @@ const mongoose = require('mongoose');
 const blogSchema = new mongoose.Schema({
     title : {
         type : String,
-        required: true,
+        required: [true, "Empty title is not allowed"],
         trim: true,
         minlength: 3,
         maxlength: 100
     },
     content: {
         type: String,
-        required: true,
+        required: [true, "Empty blog is not allowed"]
     },
     dateOfCreation : {
         type : Date,
@@ -18,7 +18,7 @@ const blogSchema = new mongoose.Schema({
     },
     category: {
         type: String,
-        dafault: "No Category"
+        required: [true, "Please Provide a category"]
     },
     author: {
         type: mongoose.Schema.Types.ObjectId,
