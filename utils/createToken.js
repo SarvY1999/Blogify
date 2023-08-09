@@ -6,7 +6,7 @@ const genToken = (payload) => {
 }
 
 const isTokenValid = (token) => {
-    jwt.verify(token, process.env.JWT_SECRET);
+    return jwt.verify(token, process.env.JWT_SECRET);
 }
 
 const createCookieAndAttachtoUser = (res, user) => {
