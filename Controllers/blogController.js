@@ -3,19 +3,13 @@ const { StatusCodes } = require('http-status-codes');
 const BadRequestError = require("../error/BadReqError")
 
 const createPost = async (req, res) => {
-   const {title} = req.body;
 
-   if(!title) {
-    throw new BadRequestError("Please Provide the Title", StatusCodes.BAD_REQUEST);
-   };
-
-   const post = await Post.create(req.body);
+    const post = await Post.create(req.body);
    res.status(StatusCodes.CREATED).json({blog: post});
 
 };
 
 const getAllposts = async (req, res) => {
-    
     const posts = await Post.find({});
 
     res.status(StatusCodes.OK).json({posts, postsFound: posts.length});
