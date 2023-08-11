@@ -8,7 +8,7 @@ const getAllUser = async (req, res) => {
 };
 
 const getSingleUser = async (req, res) => {
-    const user = await User.findOne({ _id: req.params.userId});
+    const user = await User.findOne({ _id: req.params.userId}).select('-password');
 
     if (!user) {
         throw new BadRequestError(`No user found with id : ${req.params.userId}`, StatusCodes.NOT_FOUND);
@@ -23,21 +23,49 @@ const updateUser = async (req, res) => {
         throw new BadRequestError('Empty Fields are not allowed', StatusCodes.BAD_REQUEST)
     }
 
-    const user = await User.findOneAndUpdate({_id : req.params.userId, role: "user"}, req.body, { new: true, runValidators: true }).select("-password");
+    const user = await User.findOneAndUpdate({_id : req.user.userId}, req.body, { new: true, runValidators: true }).select("-password");
     
     if(!user){
-        throw new BadRequestError(`No user found with id : ${req.params.userId}`, StatusCodes.NOT_FOUND);
+        throw new BadRequestError(`No user found with id : ${req.user.userId}`, StatusCodes.NOT_FOUND);
     }
     
     res.status(StatusCodes.OK).json({user});
 };
 
 const UpdateUserPassword = async (req, res) => {
-    res.send('Update User password');
+    const {oldPassword, newPassword} = req.body;
+
+    if(!oldPassword || !newPassword){
+        throw new BadRequestError("Please Provide old password and new password", StatusCodes.BAD_REQUEST);
+    };
+
+    const user = await User.findOne({_id : req.user.userId}); // req.user.userId is coming from authenticateUser middleware
+
+    if(!user){ 
+        throw new BadRequestError(`No user found with id : ${req.user.userId}`, StatusCodes.NOT_FOUND);
+    };
+
+    const isMatch = await user.comparePassword(oldPassword);
+    if(!isMatch){
+        throw new BadRequestError(`Invalid Credentials`, StatusCodes.UNAUTHORIZED);
+    };
+
+    user.password = newPassword; 
+    await user.save(); // using .save() so that the password will be hashed.
+
+    res.status(StatusCodes.OK).json({msg: "Password Successfully changed"});
 };
 
 const deleteUser = async (req, res) => {
-    res.send('Delete User');
+
+    const user = await User.findOneAndDelete({_id: req.user.userId});
+
+    if(!user){
+        throw new BadRequestError(`No user found with id : ${req.user.userId}`, StatusCodes.NOT_FOUND);
+    };
+
+    res.status(StatusCodes.OK).json({msg: "Account Deleted Successfully!!!!"});
+
 };
 
 module.exports = { getAllUser, getSingleUser, updateUser, UpdateUserPassword, deleteUser };
