@@ -6,6 +6,7 @@ const cookieParser = require("cookie-parser");
 const connect = require('./DB/connectDb');
 const authRouter = require('./Routes/authRoute');
 const blogRouter = require('./Routes/blogRouter');
+const userRouter = require('./Routes/userRoutes');
 const errorHandler = require('./Middleware/errorHandler');
 
 const app = express();
@@ -16,6 +17,7 @@ app.use(express.json());
 app.use(cookieParser(process.env.JWT_SECRET));
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/blog', blogRouter);
+app.use('/api/v1/user', userRouter);
 
 
 app.use(errorHandler);

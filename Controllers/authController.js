@@ -12,7 +12,7 @@ const register = async (req, res) => {
         throw new BadRequestError("User Already Exists", StatusCodes.BAD_REQUEST)
     }
     const user = await User.create({ name, email, password });
-    const userObj = {name: user.name, email: user.email, role: user.role}
+    const userObj = {name: user.name, email: user.email, userId: user._id, role: user.role}
     createCookieAndAttachtoUser(res, userObj);
     res.status(StatusCodes.CREATED).json({ user : userObj});
 };
@@ -35,7 +35,7 @@ const login = async (req, res) => {
         throw new BadRequestError("Credentials invalid", StatusCodes.UNAUTHORIZED);
     }
 
-    const userObj = {name: user.name, email: user.email, role: user.role}
+    const userObj = {name: user.name, email: user.email, userId: user._id, role: user.role}
     createCookieAndAttachtoUser(res, userObj);
 
     res.status(StatusCodes.OK).json({msg : "User logged in Successfull"});
